@@ -39,8 +39,7 @@ export default async function handler(req, res) {
         price_data: {
           currency: "usd",
           unit_amount: 1900,
-          product_data: { name: "Second Opinion — Full Report" }
-        },
+          product_data: { name: "Second Check It — Full Report" }
         quantity: 1
       }],
       metadata,
