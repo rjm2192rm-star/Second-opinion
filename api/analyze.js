@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const base64 = fs.readFileSync(file.filepath).toString("base64");
 
-    const instructions = `You are Second Opinion, a skeptical document-review system.
+    const instructions = `You are Second Check It, a skeptical document-review system.
 
 Your job is NOT to give professional advice. Your job is to identify concrete things in the supplied document that deserve independent verification.
 
