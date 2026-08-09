@@ -109,7 +109,7 @@ scanBtn.addEventListener('click',async()=>{
     if(!res.ok) throw new Error(data.error||'Scan failed');
 
     sealedReport=data.sealedReport;
-    sessionStorage.setItem('secondOpinionReport',sealedReport);
+    
 
     const result=document.getElementById('result');
     result.style.display='block';
@@ -141,7 +141,7 @@ scanBtn.addEventListener('click',async()=>{
 
 buyBtn.addEventListener('click',async()=>{
   document.getElementById('payerror').textContent='';
-  const report=sealedReport||sessionStorage.getItem('secondOpinionReport');
+  const report=sealedReport;
   if(!report){document.getElementById('payerror').textContent='Please run the scan again first.';return}
   buyBtn.disabled=true;buyBtn.textContent='Opening secure checkout…';
   try{
