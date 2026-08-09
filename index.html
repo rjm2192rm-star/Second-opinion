@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Second Opinion</title>
+<meta name="description" content="Before you pay it, sign it, or accept it — check it.">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f0e9;color:#161616;font-family:Arial,Helvetica,sans-serif}
+a{color:inherit}.wrap{max-width:1500px;margin:auto}
+nav{height:70px;padding:0 max(24px,6vw);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #c9c4ba;font-size:12px;letter-spacing:.12em}
+nav b{font-size:14px}.hero{padding:72px max(24px,9vw);display:grid;grid-template-columns:1.1fr .9fr;gap:70px;align-items:end}
+.eyebrow{font-size:11px;letter-spacing:.18em;margin-bottom:22px}.hero h1{font-size:clamp(52px,7vw,105px);line-height:.88;letter-spacing:-.07em;margin:0}
+.hero h1 i{font-family:Georgia,serif;font-weight:400}.hero p{font-size:18px;line-height:1.55;max-width:650px}
+.card{background:#171717;color:#fff;padding:26px;border-radius:3px}.drop{height:230px;border:1px dashed #777;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;cursor:pointer}
+.drop input{display:none}.drop strong{font-size:18px}.drop small{color:#aaa;margin-top:10px}
+button{width:100%;margin-top:16px;border:0;background:#e7ff58;color:#111;padding:18px;font-weight:800;font-size:15px;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}.error{color:#ff9b9b;margin-top:15px;line-height:1.45}.result{margin:20px max(24px,9vw) 70px;background:white;padding:42px;max-width:900px;display:none}
+.signal{font-size:11px;letter-spacing:.16em;font-weight:bold}.hot{color:#b94721}.clear{color:#38754a}
+.result h2{font-size:42px;letter-spacing:-.04em;margin:14px 0}.result>p{font-size:18px;line-height:1.5}
+.stats{display:flex;gap:60px;border-top:1px solid #ddd;border-bottom:1px solid #ddd;padding:25px 0;margin:30px 0}.stats div{display:flex;flex-direction:column}.stats b{font-size:32px}.stats span{font-size:12px;color:#666}
+.teasers{margin:25px 0}.teaser{padding:16px 0;border-bottom:1px solid #ddd}.teaser b{display:block;margin-bottom:5px}.teaser span{font-size:14px;color:#666}
+.unlock{background:#171717;color:#fff;padding:25px}.unlock p{color:#bbb;line-height:1.45}.price{font-size:32px;font-weight:800}.trust{padding:70px max(24px,9vw);background:#ded9ce}.trust h2{font-size:36px;max-width:650px}.trust p{max-width:760px;line-height:1.6}
+footer{padding:28px max(24px,9vw);font-size:12px;display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid #c9c4ba}
+@media(max-width:800px){.hero{display:block;padding-top:45px}.card{margin-top:35px}.result{padding:25px}.stats{gap:25px}.result h2{font-size:32px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><b>SECOND OPINION</b><span>Private document check</span></nav>
+
+<section class="hero">
+  <div>
+    <div class="eyebrow">AI-POWERED DOCUMENT REVIEW</div>
+    <h1>Before you pay it,<br>sign it, or accept it—<br><i>check it.</i></h1>
+    <p>Upload a quote, invoice, estimate, contract, lease, or statement. We look for math errors, duplicate charges, contradictions, odd terms, missing information, and items worth questioning.</p>
+  </div>
+
+  <div class="card">
+    <label class="drop">
+      <input id="file" type="file" accept=".pdf,image/*">
+      <strong id="filename">Choose a PDF or image</strong>
+      <small>Maximum 10 MB. Avoid highly sensitive documents.</small>
+    </label>
+    <button id="scan" disabled>Run free scan</button>
+    <div id="error" class="error"></div>
+  </div>
+</section>
+
+<section class="result" id="result">
+  <div id="signal" class="signal"></div>
+  <h2 id="headline"></h2>
+  <p id="summary"></p>
+
+  <div class="stats">
+    <div><b id="count">0</b><span>potential issues</span></div>
+    <div><b id="stakes">—</b><span>estimated stakes</span></div>
+  </div>
+
+  <div id="teasers" class="teasers"></div>
+
+  <div class="unlock" id="unlock" style="display:none">
+    <div class="price">$19</div>
+    <b>Unlock the full Second Opinion</b>
+    <p>Get every flagged item, the exact evidence we noticed, why it may matter, how confident the finding is, and a concrete question or next step.</p>
+    <button id="buy">Unlock full report — $19</button>
+    <div id="payerror" class="error"></div>
+  </div>
+</section>
+
+<section class="trust">
+  <h2>One job: find what you might have missed.</h2>
+  <p>Second Opinion is an automated review tool, not legal, financial, medical, tax, insurance, construction, or other professional advice. Findings can be wrong or incomplete. Verify important issues with the original document and an appropriate professional before acting.</p>
+</section>
+
+<footer>
+  <span>© 2026 Second Opinion</span>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/terms.html">Terms</a>
+</footer>
+</div>
+
+<script>
+const fileInput=document.getElementById('file');
+const scanBtn=document.getElementById('scan');
+const filename=document.getElementById('filename');
+const buyBtn=document.getElementById('buy');
+let sealedReport=null;
+
+fileInput.addEventListener('change',()=>{
+  const f=fileInput.files[0];
+  filename.textContent=f?f.name:'Choose a PDF or image';
+  scanBtn.disabled=!f;
+});
+
+function setError(msg){document.getElementById('error').textContent=msg||''}
+
+scanBtn.addEventListener('click',async()=>{
+  const f=fileInput.files[0]; if(!f)return;
+  scanBtn.disabled=true; scanBtn.textContent='Scanning every line…'; setError('');
+  document.getElementById('result').style.display='none';
+
+  try{
+    const fd=new FormData(); fd.append('file',f);
+    const res=await fetch('/api/analyze',{method:'POST',body:fd});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Scan failed');
+
+    sealedReport=data.sealedReport;
+    sessionStorage.setItem('secondOpinionReport',sealedReport);
+
+    const result=document.getElementById('result');
+    result.style.display='block';
+    const signal=document.getElementById('signal');
+    signal.textContent=data.worthInvestigating?'WORTH A CLOSER LOOK':'NO MAJOR FLAGS FOUND';
+    signal.className='signal '+(data.worthInvestigating?'hot':'clear');
+    document.getElementById('headline').textContent=data.headline;
+    document.getElementById('summary').textContent=data.summary;
+    document.getElementById('count').textContent=data.findingCount;
+    document.getElementById('stakes').textContent=data.estimatedStakes||'—';
+
+    const teasers=document.getElementById('teasers');
+    teasers.innerHTML='';
+    (data.teasers||[]).forEach((t,i)=>{
+      const div=document.createElement('div');
+      div.className='teaser';
+      div.innerHTML=`<b>${i+1}. ${escapeHtml(t.category)}</b><span>${escapeHtml(t.teaser)}</span>`;
+      teasers.appendChild(div);
+    });
+
+    document.getElementById('unlock').style.display=data.worthInvestigating?'block':'none';
+    result.scrollIntoView({behavior:'smooth'});
+  }catch(e){
+    setError(e.message);
+  }finally{
+    scanBtn.disabled=false; scanBtn.textContent='Run free scan';
+  }
+});
+
+buyBtn.addEventListener('click',async()=>{
+  document.getElementById('payerror').textContent='';
+  const report=sealedReport||sessionStorage.getItem('secondOpinionReport');
+  if(!report){document.getElementById('payerror').textContent='Please run the scan again first.';return}
+  buyBtn.disabled=true;buyBtn.textContent='Opening secure checkout…';
+  try{
+    const res=await fetch('/api/checkout',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({report})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Could not start checkout');
+    window.location.href=data.url;
+  }catch(e){
+    document.getElementById('payerror').textContent=e.message;
+    buyBtn.disabled=false;buyBtn.textContent='Unlock full report — $19';
+  }
+});
+
+function escapeHtml(s=''){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your Second Opinion</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f0e9;color:#161616;font-family:Arial,Helvetica,sans-serif}
+main{max-width:900px;margin:auto;padding:50px 24px 90px}.eyebrow{font-size:11px;letter-spacing:.18em}.top{border-bottom:1px solid #c8c2b8;padding-bottom:25px;margin-bottom:35px}
+h1{font-size:clamp(42px,7vw,72px);letter-spacing:-.055em;line-height:.95;margin:12px 0}p{line-height:1.55}.finding{background:white;padding:25px;margin:18px 0;border-left:5px solid #171717}
+.finding h2{margin:0 0 8px;font-size:23px}.meta{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#666;margin-bottom:16px}
+.label{font-size:11px;text-transform:uppercase;letter-spacing:.11em;font-weight:bold;margin-top:18px}.answer{line-height:1.55}.loading{padding:30px;background:#171717;color:#fff}.error{background:#fff0f0;padding:20px;color:#8b1e1e}
+.disclaimer{margin-top:40px;padding-top:25px;border-top:1px solid #c8c2b8;font-size:13px;color:#555}
+button{border:0;background:#171717;color:#fff;padding:15px 20px;font-weight:bold;cursor:pointer}
+</style>
+</head>
+<body><main>
+<div class="top"><div class="eyebrow">SECOND OPINION · PAID REPORT</div><h1>Your full review.</h1><p id="subtitle">Verifying payment and unlocking your findings…</p></div>
+<div id="status" class="loading">Loading report…</div>
+<div id="report"></div>
+<div class="disclaimer">This report is automated informational analysis, not professional advice. Verify material findings independently before making decisions.</div>
+</main>
+<script>
+async function load(){
+  const params=new URLSearchParams(location.search);
+  const sessionId=params.get('session_id');
+  const report=sessionStorage.getItem('secondOpinionReport');
+  const status=document.getElementById('status');
+
+  if(!sessionId||!report){
+    status.className='error';
+    status.innerHTML='We could not recover this report in this browser. If you just paid, return using the same browser tab used for the original scan.';
+    return;
+  }
+
+  try{
+    const res=await fetch('/api/unlock',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({sessionId,report})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Could not unlock report');
+
+    status.style.display='none';
+    document.getElementById('subtitle').textContent=data.summary||'Review the items below and verify anything important.';
+    const target=document.getElementById('report');
+
+    (data.findings||[]).forEach((f,i)=>{
+      const div=document.createElement('div');
+      div.className='finding';
+      div.innerHTML=`
+        <div class="meta">Finding ${i+1} · ${esc(f.category)} · ${esc(f.confidence)} confidence</div>
+        <h2>${esc(f.title)}</h2>
+        <div class="label">What we noticed</div><div class="answer">${esc(f.evidence)}</div>
+        <div class="label">Why it may matter</div><div class="answer">${esc(f.whyItMatters)}</div>
+        <div class="label">What to do next</div><div class="answer">${esc(f.nextStep)}</div>`;
+      target.appendChild(div);
+    });
+  }catch(e){
+    status.className='error';status.textContent=e.message;
+  }
+}
+function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+load();
+</script></body></html>
