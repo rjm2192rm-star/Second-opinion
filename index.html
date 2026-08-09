@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Second Opinion</title>
+<meta name="description" content="Before you pay it, sign it, or accept it — check it.">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f0e9;color:#161616;font-family:Arial,Helvetica,sans-serif}
+nav{height:70px;padding:0 max(24px,6vw);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #c9c4ba;font-size:12px;letter-spacing:.12em}
+nav b{font-size:14px}.hero{padding:72px max(24px,9vw);display:grid;grid-template-columns:1.1fr .9fr;gap:70px;align-items:end}
+.eyebrow{font-size:11px;letter-spacing:.18em;margin-bottom:22px}.hero h1{font-size:clamp(52px,7vw,105px);line-height:.88;letter-spacing:-.07em;margin:0}
+.hero h1 i{font-family:Georgia,serif;font-weight:400}.hero p{font-size:18px;line-height:1.55;max-width:650px}
+.card{background:#171717;color:#fff;padding:26px;border-radius:3px}.drop{height:230px;border:1px dashed #777;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;cursor:pointer}
+.drop input{display:none}.drop strong{font-size:18px}.drop small{color:#aaa;margin-top:10px}
+button{width:100%;margin-top:16px;border:0;background:#e7ff58;color:#111;padding:18px;font-weight:800;font-size:15px;cursor:pointer}
+button:disabled{opacity:.45}.error{color:#b42318;margin-top:15px}.result{margin:20px max(24px,9vw) 70px;background:white;padding:42px;max-width:900px;display:none}
+.signal{font-size:11px;letter-spacing:.16em;font-weight:bold}.hot{color:#b94721}.clear{color:#38754a}
+.result h2{font-size:42px;letter-spacing:-.04em;margin:14px 0}.result>p{font-size:18px;line-height:1.5}
+.stats{display:flex;gap:60px;border-top:1px solid #ddd;border-bottom:1px solid #ddd;padding:25px 0;margin:30px 0}.stats div{display:flex;flex-direction:column}.stats b{font-size:32px}.stats span{font-size:12px;color:#666}
+.unlock{background:#171717;color:#fff;padding:25px}.unlock p{color:#bbb}.trust{padding:70px max(24px,9vw);background:#ded9ce}.trust h2{font-size:36px;max-width:600px}.trust p{max-width:720px;line-height:1.6}
+@media(max-width:800px){.hero{display:block;padding-top:45px}.card{margin-top:35px}.result{padding:25px}.stats{gap:25px}.result h2{font-size:32px}}
+</style>
+</head>
+<body>
+<nav><b>SECOND OPINION</b><span>Private document check</span></nav>
+
+<section class="hero">
+  <div>
+    <div class="eyebrow">AI-POWERED DOCUMENT REVIEW</div>
+    <h1>Before you pay it,<br>sign it, or accept it—<br><i>check it.</i></h1>
+    <p>Drop in a quote, invoice, estimate, contract, lease, or statement. We look for contradictions, math errors, duplicate charges, unusual terms, and things worth questioning.</p>
+  </div>
+  <div class="card">
+    <label class="drop">
+      <input id="file" type="file" accept=".pdf,image/*">
+      <strong id="filename">Choose a PDF or image</strong>
+      <small>Your file is analyzed for this request only.</small>
+    </label>
+    <button id="scan" disabled>Run free scan</button>
+    <div id="error" class="error"></div>
+  </div>
+</section>
+
+<section class="result" id="result">
+  <div id="signal" class="signal"></div>
+  <h2 id="headline"></h2>
+  <p id="summary"></p>
+  <div class="stats">
+    <div><b id="count">0</b><span>potential issues</span></div>
+    <div><b id="stakes">—</b><span>estimated stakes</span></div>
+  </div>
+  <div class="unlock" id="unlock" style="display:none">
+    <b>Full Second Opinion</b>
+    <p>See each flagged item, where it appears, why it matters, and what to ask next.</p>
+    <button onclick="alert('Stripe gets connected next.')">Unlock report — $19</button>
+  </div>
+</section>
+
+<section class="trust">
+  <h2>One job: find what you might have missed.</h2>
+  <p>Second Opinion identifies potential inconsistencies and questions for independent verification. It does not provide legal, financial, medical, or other professional advice.</p>
+</section>
+
+<script>
+const fileInput=document.getElementById('file');
+const scanBtn=document.getElementById('scan');
+const filename=document.getElementById('filename');
+fileInput.addEventListener('change',()=>{
+  const f=fileInput.files[0];
+  filename.textContent=f?f.name:'Choose a PDF or image';
+  scanBtn.disabled=!f;
+});
+scanBtn.addEventListener('click',async()=>{
+  const f=fileInput.files[0]; if(!f)return;
+  scanBtn.disabled=true; scanBtn.textContent='Scanning every line…';
+  document.getElementById('error').textContent='';
+  try{
+    const fd=new FormData(); fd.append('file',f);
+    const res=await fetch('/api/analyze',{method:'POST',body:fd});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||'Scan failed');
+    const result=document.getElementById('result');
+    result.style.display='block';
+    const signal=document.getElementById('signal');
+    signal.textContent=data.worthInvestigating?'WORTH A CLOSER LOOK':'NO MAJOR FLAGS FOUND';
+    signal.className='signal '+(data.worthInvestigating?'hot':'clear');
+    document.getElementById('headline').textContent=data.headline;
+    document.getElementById('summary').textContent=data.summary;
+    document.getElementById('count').textContent=data.findingCount;
+    document.getElementById('stakes').textContent=data.estimatedStakes||'—';
+    document.getElementById('unlock').style.display=data.worthInvestigating?'block':'none';
+    result.scrollIntoView({behavior:'smooth'});
+  }catch(e){
+    document.getElementById('error').textContent=e.message;
+  }finally{
+    scanBtn.disabled=false; scanBtn.textContent='Run free scan';
+  }
+});
+</script>
+</body>
+</html>

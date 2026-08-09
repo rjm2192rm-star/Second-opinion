@@ -1,0 +1,9 @@
+{
+  "name": "second-opinion",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "formidable": "^3.5.4",
+    "openai": "^5.0.0"
+  }
+}
