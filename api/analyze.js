@@ -42,7 +42,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only." });
 
   const usage = scanCookie(req);
-  if (usage.count >= 999) {
+  if (usage.count >= 5) {
     return res.status(429).json({ error: "Free scan limit reached for today. Please try again tomorrow." });
   }
 
