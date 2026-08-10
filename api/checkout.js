@@ -16,12 +16,15 @@ export default async function handler(req, res) {
 
     const CHUNK_SIZE = 450;
     const chunks = [];
+
     for (let i = 0; i < report.length; i += CHUNK_SIZE) {
       chunks.push(report.slice(i, i + CHUNK_SIZE));
     }
 
     if (chunks.length > 40) {
-      return res.status(400).json({ error: "This report is too large to unlock securely. Please try a shorter document." });
+      return res.status(400).json({
+        error: "This report is too large to unlock securely. Please try a shorter document."
+      });
     }
 
     const metadata = {
@@ -39,7 +42,10 @@ export default async function handler(req, res) {
         price_data: {
           currency: "usd",
           unit_amount: 1900,
-          product_data: { name: "Second Check It — Full Report" }
+          product_data: {
+            name: "Second Check It — Full Report"
+          }
+        },
         quantity: 1
       }],
       metadata,
@@ -49,8 +55,11 @@ export default async function handler(req, res) {
     });
 
     return res.status(200).json({ url: session.url });
+
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Secure checkout is not available yet." });
+    return res.status(500).json({
+      error: "Secure checkout is not available yet."
+    });
   }
 }
