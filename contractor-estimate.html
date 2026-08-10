@@ -1,0 +1,582 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Check a Contractor Estimate for Errors | Second Check It</title>
+
+<meta name="description" content="Upload a contractor estimate or home improvement quote. Second Check It scans for math errors, duplicate charges, contradictions, missing information, and terms worth questioning.">
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f0e9;color:#161616;font-family:Arial,Helvetica,sans-serif}
+a{color:inherit}
+.wrap{max-width:1500px;margin:auto}
+
+nav{
+height:70px;
+padding:0 max(24px,6vw);
+display:flex;
+align-items:center;
+justify-content:space-between;
+border-bottom:1px solid #c9c4ba;
+font-size:12px;
+letter-spacing:.12em
+}
+
+nav b{font-size:14px}
+
+.hero{
+padding:72px max(24px,9vw);
+display:grid;
+grid-template-columns:1.1fr .9fr;
+gap:70px;
+align-items:end
+}
+
+.eyebrow{
+font-size:11px;
+letter-spacing:.18em;
+margin-bottom:22px
+}
+
+.hero h1{
+font-size:clamp(48px,7vw,92px);
+line-height:.9;
+letter-spacing:-.065em;
+margin:0
+}
+
+.hero h1 i{
+font-family:Georgia,serif;
+font-weight:400
+}
+
+.hero p{
+font-size:18px;
+line-height:1.55;
+max-width:650px
+}
+
+.card{
+background:#171717;
+color:#fff;
+padding:26px;
+border-radius:3px
+}
+
+.drop{
+height:230px;
+border:1px dashed #777;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+padding:20px;
+cursor:pointer
+}
+
+.drop input{display:none}
+.drop strong{font-size:18px}
+.drop small{color:#aaa;margin-top:10px}
+
+button{
+width:100%;
+margin-top:16px;
+border:0;
+background:#e7ff58;
+color:#111;
+padding:18px;
+font-weight:800;
+font-size:15px;
+cursor:pointer
+}
+
+button:disabled{opacity:.45;cursor:not-allowed}
+
+.error{
+color:#ff9b9b;
+margin-top:15px;
+line-height:1.45
+}
+
+.result{
+margin:20px max(24px,9vw) 70px;
+background:white;
+padding:42px;
+max-width:900px;
+display:none
+}
+
+.signal{
+font-size:11px;
+letter-spacing:.16em;
+font-weight:bold
+}
+
+.hot{color:#b94721}
+.clear{color:#38754a}
+
+.result h2{
+font-size:42px;
+letter-spacing:-.04em;
+margin:14px 0
+}
+
+.result>p{
+font-size:18px;
+line-height:1.5
+}
+
+.stats{
+display:flex;
+gap:60px;
+border-top:1px solid #ddd;
+border-bottom:1px solid #ddd;
+padding:25px 0;
+margin:30px 0
+}
+
+.stats div{display:flex;flex-direction:column}
+.stats b{font-size:32px}
+.stats span{font-size:12px;color:#666}
+
+.teasers{margin:25px 0}
+
+.teaser{
+padding:16px 0;
+border-bottom:1px solid #ddd
+}
+
+.teaser b{display:block;margin-bottom:5px}
+.teaser span{font-size:14px;color:#666}
+
+.unlock{
+background:#171717;
+color:#fff;
+padding:25px
+}
+
+.unlock p{
+color:#bbb;
+line-height:1.45
+}
+
+.price{
+font-size:32px;
+font-weight:800
+}
+
+.info{
+padding:70px max(24px,9vw);
+background:#ded9ce
+}
+
+.info-inner{max-width:850px}
+
+.info h2{
+font-size:36px;
+letter-spacing:-.03em
+}
+
+.info h3{margin-top:32px}
+
+.info p,.info li{
+line-height:1.65
+}
+
+footer{
+padding:28px max(24px,9vw);
+font-size:12px;
+display:flex;
+gap:18px;
+flex-wrap:wrap;
+border-top:1px solid #c9c4ba
+}
+
+@media(max-width:800px){
+.hero{display:block;padding-top:45px}
+.card{margin-top:35px}
+.result{padding:25px}
+.stats{gap:25px}
+.result h2{font-size:32px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<nav>
+<a href="/"><b>SECOND CHECK IT</b></a>
+<span>Contractor estimate check</span>
+</nav>
+
+<section class="hero">
+
+<div>
+
+<div class="eyebrow">CONTRACTOR ESTIMATE REVIEW</div>
+
+<h1>
+Before you approve<br>
+the estimate—<br>
+<i>check it.</i>
+</h1>
+
+<p>
+Upload a contractor estimate, renovation quote, or home improvement proposal.
+Second Check It scans the document for potential math errors, duplicate charges,
+contradictions, missing information, and terms worth asking about before you approve the work.
+</p>
+
+</div>
+
+<div class="card">
+
+<label class="drop">
+
+<input id="file" type="file" accept=".pdf,image/*">
+
+<strong id="filename">
+Choose an estimate or quote
+</strong>
+
+<small>
+PDF or image · Maximum 10 MB · Avoid highly sensitive documents
+</small>
+
+</label>
+
+<button id="scan" disabled>
+Check my estimate
+</button>
+
+<div id="error" class="error"></div>
+
+</div>
+
+</section>
+
+
+<section class="result" id="result">
+
+<div id="signal" class="signal"></div>
+
+<h2 id="headline"></h2>
+
+<p id="summary"></p>
+
+<div class="stats">
+
+<div>
+<b id="count">0</b>
+<span>potential issues</span>
+</div>
+
+<div>
+<b id="stakes">—</b>
+<span>estimated stakes</span>
+</div>
+
+</div>
+
+<div id="teasers" class="teasers"></div>
+
+<div class="unlock" id="unlock" style="display:none">
+
+<div class="price">$19</div>
+
+<b>Unlock the full Second Check It report</b>
+
+<p>
+Get every flagged item, the evidence we noticed, why it may matter,
+how confident the finding is, and a concrete question or next step.
+</p>
+
+<button id="buy">
+Unlock full report — $19
+</button>
+
+<div id="payerror" class="error"></div>
+
+</div>
+
+</section>
+
+
+<section class="info">
+
+<div class="info-inner">
+
+<h2>What can be checked in a contractor estimate?</h2>
+
+<p>
+Contractor estimates can contain dozens of quantities, prices, allowances,
+fees, exclusions, and project terms. Second Check It provides an automated
+second pass over the document before you approve it.
+</p>
+
+<h3>Things the scan looks for</h3>
+
+<ul>
+<li>Arithmetic, subtotal, or total inconsistencies</li>
+<li>Potentially duplicated or overlapping charges</li>
+<li>Conflicting quantities, prices, dates, or descriptions</li>
+<li>Missing information that appears important to the estimate</li>
+<li>Fees, exclusions, assumptions, or limitations worth noticing</li>
+<li>Vague or internally inconsistent wording</li>
+</ul>
+
+<h3>What it does not do</h3>
+
+<p>
+Second Check It does not determine whether a contractor's price is fair,
+verify market pricing, inspect workmanship, or provide legal or construction
+advice. Automated analysis can also miss issues or flag something that turns
+out not to be a problem.
+</p>
+
+<p>
+Use the results as questions to investigate before making a significant decision.
+</p>
+
+</div>
+
+</section>
+
+
+<footer>
+
+<span>© 2026 Second Check It</span>
+
+<a href="/privacy.html">Privacy</a>
+
+<a href="/terms.html">Terms</a>
+
+<a href="mailto:secondcheckit@outlook.com">Support</a>
+
+</footer>
+
+</div>
+
+
+<script>
+
+const fileInput=document.getElementById('file');
+const scanBtn=document.getElementById('scan');
+const filename=document.getElementById('filename');
+const buyBtn=document.getElementById('buy');
+
+let sealedReport=null;
+
+fileInput.addEventListener('change',()=>{
+
+const f=fileInput.files[0];
+
+filename.textContent=f?f.name:'Choose an estimate or quote';
+
+scanBtn.disabled=!f;
+
+});
+
+
+function setError(msg){
+
+document.getElementById('error').textContent=msg||'';
+
+}
+
+
+scanBtn.addEventListener('click',async()=>{
+
+const f=fileInput.files[0];
+
+if(!f)return;
+
+scanBtn.disabled=true;
+
+scanBtn.textContent='Checking every line…';
+
+setError('');
+
+document.getElementById('result').style.display='none';
+
+
+try{
+
+const fd=new FormData();
+
+fd.append('file',f);
+
+const res=await fetch('/api/analyze',{
+method:'POST',
+body:fd
+});
+
+const data=await res.json();
+
+if(!res.ok)
+throw new Error(data.error||'Scan failed');
+
+
+sealedReport=data.sealedReport;
+
+
+const result=document.getElementById('result');
+
+result.style.display='block';
+
+
+const signal=document.getElementById('signal');
+
+signal.textContent=
+data.worthInvestigating
+?'WORTH A CLOSER LOOK'
+:'NO MAJOR FLAGS FOUND';
+
+signal.className=
+'signal '+(data.worthInvestigating?'hot':'clear');
+
+
+document.getElementById('headline').textContent=data.headline;
+
+document.getElementById('summary').textContent=data.summary;
+
+document.getElementById('count').textContent=data.findingCount;
+
+document.getElementById('stakes').textContent=
+data.estimatedStakes||'—';
+
+
+const teasers=document.getElementById('teasers');
+
+teasers.innerHTML='';
+
+
+(data.teasers||[]).forEach((t,i)=>{
+
+const div=document.createElement('div');
+
+div.className='teaser';
+
+div.innerHTML=
+`<b>${i+1}. ${escapeHtml(t.category)}</b>
+<span>${escapeHtml(t.teaser)}</span>`;
+
+teasers.appendChild(div);
+
+});
+
+
+document.getElementById('unlock').style.display=
+data.worthInvestigating?'block':'none';
+
+
+result.scrollIntoView({
+behavior:'smooth'
+});
+
+
+}catch(e){
+
+setError(e.message);
+
+}finally{
+
+scanBtn.disabled=false;
+
+scanBtn.textContent='Check my estimate';
+
+}
+
+});
+
+
+buyBtn.addEventListener('click',async()=>{
+
+document.getElementById('payerror').textContent='';
+
+const report=sealedReport;
+
+if(!report){
+
+document.getElementById('payerror').textContent=
+'Please run the scan again first.';
+
+return;
+
+}
+
+
+buyBtn.disabled=true;
+
+buyBtn.textContent='Opening secure checkout…';
+
+
+try{
+
+const res=await fetch('/api/checkout',{
+
+method:'POST',
+
+headers:{
+'content-type':'application/json'
+},
+
+body:JSON.stringify({report})
+
+});
+
+
+const data=await res.json();
+
+
+if(!res.ok)
+throw new Error(
+data.error||'Could not start checkout'
+);
+
+
+window.location.href=data.url;
+
+
+}catch(e){
+
+document.getElementById('payerror').textContent=
+e.message;
+
+buyBtn.disabled=false;
+
+buyBtn.textContent=
+'Unlock full report — $19';
+
+}
+
+});
+
+
+function escapeHtml(s=''){
+
+return String(s).replace(
+/[&<>"']/g,
+m=>({
+'&':'&amp;',
+'<':'&lt;',
+'>':'&gt;',
+'"':'&quot;',
+"'":'&#039;'
+}[m])
+);
+
+}
+
+</script>
+
+<script type="module" src="/analytics.js"></script>
+
+</body>
+</html>
